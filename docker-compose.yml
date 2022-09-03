@@ -1,0 +1,158 @@
+version: "3.7"
+
+services:
+
+# ********************************************************************************
+# The following section should be copied from the official Subspace Docker Compose
+# guide at https://github.com/subspace/subspace/blob/main/docs/farming.md
+#*********************************************************************************
+
+  node:
+    container_name: subspace-node
+    # Replace `snapshot-DATE` with latest release (like `snapshot-2022-apr-29`)
+    # For running on Aarch64 add `-aarch64` after `DATE`
+    image: ghcr.io/subspace/node:snapshot-DATE
+    volumes:
+# Instead of specifying volume (which will store data in `/var/lib/docker`), you can
+# alternatively specify path to the directory where files will be stored, just make
+# sure everyone is allowed to write there
+      - node-data:/var/subspace:rw
+#      - /path/to/subspace-node:/var/subspace:rw
+    ports:
+# If port 30333 is already occupied by another Substrate-based node, replace all
+# occurrences of `30333` in this file with another value
+      - "0.0.0.0:30333:30333"
+    expose:
+      - "9615:9615"
+    restart: unless-stopped
+    command: [
+      "--chain", "gemini-1",
+      "--base-path", "/var/subspace",
+      "--execution", "wasm",
+      "--blocks-pruning", "1024",
+      "--state-pruning", "1024",
+      "--port", "30336",
+      "--rpc-cors", "all",
+      "--rpc-methods", "safe",
+      "--unsafe-ws-external",
+      "--validator",
+# Expose Prometheus exporter on all interfaces.
+# Default is local.
+      "--prometheus-external",
+# Specify Prometheus exporter.
+      "--prometheus-port", "9615",
+# Replace `INSERT_YOUR_ID` with your node ID (will be shown in telemetry)
+      "--name", "INSERT_YOUR_ID"
+    ]
+    healthcheck:
+      timeout: 5s
+# If node setup takes longer then expected, you want to increase `interval` and `retries` number.
+      interval: 30s
+      retries: 5
+
+  farmer:
+    container_name: subspace-farmer
+    depends_on:
+      node:
+        condition: service_healthy
+    # For running on Aarch64 add `-aarch64` after `DATE`
+    image: ghcr.io/nazar-pc/farmer:snapshot-DATE
+    volumes:
+# Instead of specifying volume (which will store data in `/var/lib/docker`), you can
+# alternatively specify path to the directory where files will be stored, just make
+# sure everyone is allowed to write there
+      - farmer-data:/var/subspace:rw
+#      - /path/to/subspace-farmer:/var/subspace:rw
+
+# Un-comment following 2 lines to unlock farmer's RPC
+    ports:
+# Un-comment following line to unlock farmer's RPC
+#      - "127.0.0.1:9955:9955"
+# If port 40333 is already occupied by something else, replace all
+# occurrences of `40333` in this file with another value
+      - "0.0.0.0:40333:40333"
+    restart: unless-stopped
+    command: [
+      "--base-path", "/var/subspace",
+      "farm",
+      "--node-rpc-url", "ws://node:9944",
+      "--ws-server-listen-addr", "0.0.0.0:9955",
+      "--listen-on", "/ip4/0.0.0.0/tcp/40333",
+# Replace `WALLET_ADDRESS` with your Polkadot.js wallet address
+      "--reward-address", "WALLET_ADDRESS",
+# Replace `PLOT_SIZE` with plot size in gigabytes or terabytes, for instance 100G or 2T (but leave at least 10G of disk space for node)
+      "--plot-size", "PLOT_SIZE"
+    ]
+
+# ********************************************************************************
+# The above section should be copied from the official Subspace Docker Compose
+# guide at https://github.com/subspace/subspace/blob/main/docs/farming.md
+#*********************************************************************************
+
+# ********************************************************************************
+# The below section defines the containers we need for the monitoring stack
+#*********************************************************************************
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=ADMIN
+      - GF_SECURITY_ADMIN_PASSWORD=StrongPassword
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_DISABLE_BRUTE_FORCE_LOGIN_PROTECTION=false
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    expose:
+      - 9090:9090
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - 9100
+
+# ********************************************************************************
+# The above section defines the containers we need for the monitoring stack
+#*********************************************************************************
+
+volumes:
+# ********************************************************************************
+# These first two volumes are required by the default setup from the official
+# guide at https://github.com/subspace/subspace/blob/main/docs/farming.md
+#*********************************************************************************
+  node-data:
+  farmer-data:
+# ********************************************************************************
+# These next volumes are required by the monitoring solution
+#*********************************************************************************
+  grafana_data:
+  prometheus_data:
