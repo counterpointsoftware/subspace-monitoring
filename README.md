@@ -2,19 +2,14 @@
 
 Subspace node and farmer with monitoring stack using Docker Compose.
 
-## TODO
+NOTE: This is a basic setup that is only recommended for use on a computer/server which is on a secure network. This is becuase we will be opening ports to the whole network that should always be controlled with additional access rules when that means the internet.
 
-  - Add explanation of each of the components and why we use them.
-  - Alerting.
-  - Explanation of host networking to mix bare metal and Docker components.
-  - Parameterised convenience script.
- 
 ## Overview
 
 This repository extends the Subspace Docker compose setup to include a monitoring solution that allows the user to track instantaneous performance as well as look for trends in the way their node is operating over time. It is made up of the following components:
 
-  - Subspace node
-  - Subspace farmer
+  - Subspace Node
+  - Subspace Farmer
   - Grafana
   - Prometheus
   - Node Exporter
@@ -23,7 +18,7 @@ In this version, all of these items are setup to run under a single Docker compo
 
 ## A Detailed Look
 
-At the core of this solution are the Subspace node and farmer. These are containerised versions of the application which you can read more about here: https://github.com/subspace/subspace/blob/main/docs/farming.md. We take the example `docker-compose.yml` offered here and add the following extra Docker images:
+At the core of this solution are the Subspace Node and Farmer. These are containerised versions of the application which you can read more about here: https://github.com/subspace/subspace/blob/main/docs/farming.md. We take the example `docker-compose.yml` offered here and add the following extra Docker images:
 
   - Grafana (https://grafana.com/)
     - Allows us to visualise the monitoring data we are collecting. It enables us to hook 'scraped' data up to dashboards that give us an easy on the eye way of interpreting the raw data.
@@ -56,4 +51,52 @@ A custom dashboard has been written that will automatically be provisioned when 
 
 Once all of these steps have been followed you should be able to open a terminal and navigate to the same folder the `docker-compose.yml` file you've been editing is located before running the `docker compose up --detach` command. Once the stack has initialised you should be able to access Grafana on http://localhost:3000.
 
+## The Subspace Dashboard
+
+The main dashboard is split up into three sactions:
+
+### Hardware
+
+An at-a-glance state of the how the host hardware is performing.
+
+![Subspace Dashboard - Hardware](screenshots/subspace-dashboard-01.png "Subspace Dashboard - Hardware")
+
+### Validator Stats
+
+Metrics being exposed by the Prometheus interface on the Subspace Node.
+
+![Subspace Dashboard - Validator Stats](screenshots/subspace-dashboard-02.png "Subspace Dashboard - Validator Stats")
+
+![Subspace Dashboard - Validator Stats](screenshots/subspace-dashboard-03.png "Subspace Dashboard - Validator Stats")
+
+### Sync Progress
+
+How are we doing with reaching the chainhead?
+
+![Subspace Dashboard - Sync Progress](screenshots/subspace-dashboard-03a.png "Subspace Dashboard - Sync Progress")
+
+### Node Stats
+
+A closer look at some of the more interesting hardware metrics.
+
+![Subspace Dashboard - Node Stats](screenshots/subspace-dashboard-04.png "Subspace Dashboard - Node Stats")
+
+![Subspace Dashboard - Node Stats](screenshots/subspace-dashboard-05.png "Subspace Dashboard - Node Stats")
+
 ## Troubleshooting
+
+  - Coming soon.
+
+## A Note On Security
+
+At the top of this readme there is a note that this simple configuration should only be used when the stack is being run on a machine which is already part of a secure network. This typically means a laptop or desktop PC which is in your home behind the same firewall that protects all of your home devices.
+
+The reason for this is that Docker uses IP tables to override certain software firewalls which may be running on your machine and results in ports being exposed to everyone on the internet. The main situation this would occur is where the Docker host is a server in a datacentre.
+
+Additional security should be applied to harden the server so that only particular addresses (yours) should be able to access the Grafana port. A better alternative may be to setup a reverse proxy which gives a granular control over access rules.
+
+## Coming Soon (TODOs)
+
+  - Parameterised convenience script.
+  - Alerting.
+  - Explanation of host networking to mix bare metal and Docker components.
