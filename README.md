@@ -2,7 +2,9 @@
 
 Subspace node and farmer with monitoring stack using Docker Compose.
 
-NOTE: This is a basic setup that is only recommended for use on a computer/server which is on a secure network. This is becuase we will be opening ports to the whole network that should always be controlled with additional access rules when that means the internet.
+## Important Note
+
+This is a basic setup that is only recommended for use on a computer/server which is on a secure network with fully understood ingress. This is becuase we will be opening ports to the whole network that should always be controlled with additional access rules when that means the internet.
 
 ## Overview
 
@@ -39,7 +41,7 @@ A custom dashboard has been written that will automatically be provisioned when 
       - In addition, we will need to expose port 9615 to the Docker network with:
         - `    expose:`
         - `      - "9615:9615"`
-    - Follow the official instructions to ensure you customise Subspace items as necessary:
+    - Follow the official instructions to ensure you customise Subspace parameters as necessary:
       - Replace snapshot-DATE with the latest release (not pre-release!) snapshot (like snapshot-2022-apr-29)
       - Replace INSERT_YOUR_ID with desired name that will be shown in telemetry (doesn't impact anything else)
       - Replace WALLET_ADDRESS with your wallet address
@@ -53,7 +55,7 @@ Once all of these steps have been followed you should be able to open a terminal
 
 ## The Subspace Dashboard
 
-The main dashboard is split up into three sactions:
+The main dashboard is split up into four sections:
 
 ### Hardware
 
@@ -63,7 +65,7 @@ An at-a-glance state of the how the host hardware is performing.
 
 ### Validator Stats
 
-Metrics being exposed by the Prometheus interface on the Subspace Node.
+Metrics being exposed by the Prometheus interface on the Subspace Node. Credit goes to Alan Yoon on Discord for this section.
 
 ![Subspace Dashboard - Validator Stats](screenshots/subspace-dashboard-02.png "Subspace Dashboard - Validator Stats")
 
@@ -77,7 +79,7 @@ How are we doing with reaching the chainhead?
 
 ### Node Stats
 
-A closer look at some of the more interesting hardware metrics.
+A closer look at some of the more relevant hardware metrics.
 
 ![Subspace Dashboard - Node Stats](screenshots/subspace-dashboard-04.png "Subspace Dashboard - Node Stats")
 
@@ -85,13 +87,13 @@ A closer look at some of the more interesting hardware metrics.
 
 ## Troubleshooting
 
-  - Coming soon.
+  - To see what is going on with your containers you can issue the command `docker compose logs --tail=1000 --follow`. Make sure you are in the same folder as your `docker-compose.yml`.
 
 ## A Note On Security
 
 At the top of this readme there is a note that this simple configuration should only be used when the stack is being run on a machine which is already part of a secure network. This typically means a laptop or desktop PC which is in your home behind the same firewall that protects all of your home devices.
 
-The reason for this is that Docker uses IP tables to override certain software firewalls which may be running on your machine and results in ports being exposed to everyone on the internet. The main situation this would occur is where the Docker host is a server in a datacentre.
+The reason for this is that Docker uses IP tables to setup its networks and will override certain software firewalls which may be running on your machine and results in ports being exposed to everyone on the internet. The main situation this would occur is where the Docker host is a server in a datacentre.
 
 Additional security should be applied to harden the server so that only particular addresses (yours) should be able to access the Grafana port. A better alternative may be to setup a reverse proxy which gives a granular control over access rules.
 
@@ -100,3 +102,5 @@ Additional security should be applied to harden the server so that only particul
   - Parameterised convenience script.
   - Alerting.
   - Explanation of host networking to mix bare metal and Docker components.
+  - Multi node support.
+  - Dashboard upload.
