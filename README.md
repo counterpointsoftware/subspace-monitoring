@@ -104,3 +104,4 @@ Additional security should be applied to harden the server so that only particul
   - Explanation of host networking to mix bare metal and Docker components.
   - Multi node support.
   - Dashboard upload.
+  - Public playground.
