@@ -65,7 +65,7 @@ An at-a-glance state of the how the host hardware is performing.
 
 ### Validator Stats
 
-Metrics being exposed by the Prometheus interface on the Subspace Node. Credit goes to Alan Yoon on Discord for this section.
+Metrics being exposed by the Prometheus interface on the Subspace Node. Credit goes to Alan Yoon#2149 on Discord for this section.
 
 ![Subspace Dashboard - Validator Stats](screenshots/subspace-dashboard-02.png "Subspace Dashboard - Validator Stats")
 
@@ -96,6 +96,10 @@ At the top of this readme there is a note that this simple configuration should 
 The reason for this is that Docker uses IP tables to setup its networks and will override certain software firewalls which may be running on your machine and results in ports being exposed to everyone on the internet. The main situation this would occur is where the Docker host is a server in a datacentre.
 
 Additional security should be applied to harden the server so that only particular addresses (yours) should be able to access the Grafana port. A better alternative may be to setup a reverse proxy which gives a granular control over access rules.
+
+## Bare Metal Gang
+
+If you prefer to use bare metal rather than Docker solutions and would like to use this monitoring stack I would suggest you take a look at this repository put together by jrwashburn#0765 https://github.com/jrwashburn/subspace-utils. We have collaborated so that you will end up with essentially the same solution but without the need for Docker. It also uses Docker cloud and a Prometheus push so is more suited to a datacentre environment.
 
 ## Coming Soon (TODOs)
 
