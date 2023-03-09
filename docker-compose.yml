@@ -19,22 +19,26 @@ services:
       - node-data:/var/subspace:rw
 #      - /path/to/subspace-node:/var/subspace:rw
     ports:
-# If port 30333 is already occupied by another Substrate-based node, replace all
-# occurrences of `30333` in this file with another value
+# If port 30333 or 30433 is already occupied by another Substrate-based node, replace all
+# occurrences of `30333` or `30433` in this file with another value
       - "0.0.0.0:30333:30333"
+      - "0.0.0.0:30433:30433"
     expose:
       - "9615:9615"
     restart: unless-stopped
     command: [
-      "--chain", "gemini-1",
+      "--chain", "gemini-3c",
       "--base-path", "/var/subspace",
       "--execution", "wasm",
-      "--blocks-pruning", "1024",
-      "--state-pruning", "1024",
-      "--port", "30336",
+      "--blocks-pruning", "archive",
+      "--state-pruning", "archive",
+      "--port", "30333",
+      "--dsn-listen-on", "/ip4/0.0.0.0/tcp/30433",
       "--rpc-cors", "all",
       "--rpc-methods", "safe",
       "--unsafe-ws-external",
+      "--dsn-disable-private-ips",
+      "--no-private-ipv4",
       "--validator",
 # Expose Prometheus exporter on all interfaces.
 # Default is local.
@@ -56,7 +60,7 @@ services:
       node:
         condition: service_healthy
     # For running on Aarch64 add `-aarch64` after `DATE`
-    image: ghcr.io/nazar-pc/farmer:snapshot-DATE
+    image: ghcr.io/subspace/farmer:snapshot-DATE
     volumes:
 # Instead of specifying volume (which will store data in `/var/lib/docker`), you can
 # alternatively specify path to the directory where files will be stored, just make
@@ -68,16 +72,17 @@ services:
     ports:
 # Un-comment following line to unlock farmer's RPC
 #      - "127.0.0.1:9955:9955"
-# If port 40333 is already occupied by something else, replace all
-# occurrences of `40333` in this file with another value
-      - "0.0.0.0:40333:40333"
+# If port 30533 is already occupied by something else, replace all
+# occurrences of `30533` in this file with another value
+      - "0.0.0.0:30533:30533"
     restart: unless-stopped
     command: [
       "--base-path", "/var/subspace",
       "farm",
+      "--disable-private-ips",
       "--node-rpc-url", "ws://node:9944",
-      "--ws-server-listen-addr", "0.0.0.0:9955",
-      "--listen-on", "/ip4/0.0.0.0/tcp/40333",
+      "--ws-server-listen-addr", "0.0.0.0:9944",
+      "--listen-on", "/ip4/0.0.0.0/tcp/30533",
 # Replace `WALLET_ADDRESS` with your Polkadot.js wallet address
       "--reward-address", "WALLET_ADDRESS",
 # Replace `PLOT_SIZE` with plot size in gigabytes or terabytes, for instance 100G or 2T (but leave at least 10G of disk space for node)
