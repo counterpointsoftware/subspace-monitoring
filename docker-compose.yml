@@ -27,7 +27,7 @@ services:
       - "9615:9615"
     restart: unless-stopped
     command: [
-      "--chain", "gemini-3d",
+      "--chain", "gemini-3e",
       "--base-path", "/var/subspace",
       "--execution", "wasm",
       "--blocks-pruning", "archive",
@@ -36,7 +36,7 @@ services:
       "--dsn-listen-on", "/ip4/0.0.0.0/tcp/30433",
       "--rpc-cors", "all",
       "--rpc-methods", "safe",
-      "--unsafe-ws-external",
+      "--unsafe-rpc-external",
       "--dsn-disable-private-ips",
       "--no-private-ipv4",
       "--validator",
