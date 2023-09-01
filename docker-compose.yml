@@ -27,17 +27,16 @@ services:
       - "9615:9615"
     restart: unless-stopped
     command: [
-      "--chain", "gemini-3e",
+      "--chain", "gemini-3f",
       "--base-path", "/var/subspace",
       "--execution", "wasm",
-      "--blocks-pruning", "archive",
+      "--blocks-pruning", "256",
       "--state-pruning", "archive",
       "--port", "30333",
       "--dsn-listen-on", "/ip4/0.0.0.0/tcp/30433",
       "--rpc-cors", "all",
-      "--rpc-methods", "safe",
-      "--unsafe-rpc-external",
-      "--dsn-disable-private-ips",
+      "--rpc-methods", "unsafe",
+      "--rpc-external",
       "--no-private-ipv4",
       "--validator",
 # Expose Prometheus exporter on all interfaces.
@@ -52,7 +51,7 @@ services:
       timeout: 5s
 # If node setup takes longer then expected, you want to increase `interval` and `retries` number.
       interval: 30s
-      retries: 5
+      retries: 60
 
   farmer:
     container_name: subspace-farmer
@@ -77,15 +76,13 @@ services:
       - "0.0.0.0:30533:30533"
     restart: unless-stopped
     command: [
-      "--base-path", "/var/subspace",
       "farm",
-      "--disable-private-ips",
       "--node-rpc-url", "ws://subspace-node:9944",
       "--listen-on", "/ip4/0.0.0.0/tcp/30533",
 # Replace `WALLET_ADDRESS` with your Polkadot.js wallet address
       "--reward-address", "WALLET_ADDRESS",
 # Replace `PLOT_SIZE` with plot size in gigabytes or terabytes, for instance 100G or 2T (but leave at least 10G of disk space for node)
-      "--plot-size", "PLOT_SIZE"
+      "path=/var/subspace,size=PLOT_SIZE"
     ]
 
 # ********************************************************************************
@@ -107,7 +104,6 @@ services:
       - GF_SECURITY_ADMIN_USER=ADMIN
       - GF_SECURITY_ADMIN_PASSWORD=StrongPassword
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_SECURITY_DISABLE_BRUTE_FORCE_LOGIN_PROTECTION=false
     restart: unless-stopped
     ports:
       - 3000:3000
